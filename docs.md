@@ -1,32 +1,4 @@
-# Procedural Brick Placement
-
-This program places bricks based on height and texture maps for [BeamND.drive](https://www.beamng.com)
-
-## Content
-
-### Finished:
-
-* place basic quadratic bricks like 1x1, 2x2, 4x4 according to height map
-* build streets with flat bricks angled in direction ot the street
-* main or root Config-File
-
-### Work in Progress:
-
-* procedural placement on nature elements like trees, bushes and plants based on texture map
-* placement of non-flat rock bricks, like 2x1x6 bricks where on side is angled
-* placement of non square bricks
-* filling of vertical holes
-
--------------
-
-## Setting up
-
-### Output & integration into BeamNG
-
-The Output will be saved in the jsonsOutput Folder. This Folder can simply be copied to the SceneObject folder in BeamNG.
-Before this you should already have imported all DAE-Files into to your Map in BeamNG to define Materials, etc.
-
-### config.json
+## config.json
 
 The config.json file holds standard application data and needs to be configures to match your requirements.
 
@@ -89,4 +61,3 @@ The config.json file holds standard application data and needs to be configures 
   }]
 }
 ```
-

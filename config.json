@@ -1,5 +1,5 @@
 {
-  "materialPaths": ["exampleMaterial.json", "grassMaterial.json", "fieldMaterial.json", "roadMaterial.json", "linesMaterial.json"],
+  "materialPaths": ["exampleMaterial.json"],
   "stepSize": 32,
   "worldscale": [0.25, 0.25, 0.1],
   "heightMapPath": "smallTestWorld_height.png",

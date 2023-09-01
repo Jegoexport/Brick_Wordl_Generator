@@ -105,8 +105,8 @@ if __name__ == '__main__':
     # load materials
     print("loading materials...", end=' ')
     start = time_ns()
-    #tex = [material((f'materials/' + path)) for path in config["materialPaths"]]
-    tex = [material(("materials/grassMaterial.json"))]
+    tex = [material((f'materials/' + path)) for path in config["materialPaths"]]
+    #tex = [material(("materials/grassMaterial.json"))]
     print(time_ns()-start, "nanosec for", len(tex), "materials")
 
     # define Worldscale
@@ -118,8 +118,8 @@ if __name__ == '__main__':
 
     # load heightMap
     print("loading displacement map")
-    #displacementGrid = np.asarray(Image.open(config["heightMapPath"]))
-    displacementGrid = np.array([[32 * y for y in range(4)] for x in range(4)])
+    displacementGrid = np.asarray(Image.open(config["heightMapPath"]))
+    #displacementGrid = np.array([[32 * y for y in range(4)] for x in range(4)])
     #displacementGrid = np.array([[0, 0, 0, 0],
     #                             [128, 128, 128, 128],
     #                             [0, 128, 128, 0],
@@ -128,8 +128,8 @@ if __name__ == '__main__':
 
     # load textureMap
     print("loading material map")
-    grid = [[tex[0]]*4]*4
-    #grid = convertToMaterial(config["textureMapPath"], tex)
+    #grid = [[tex[0]]*4]*4
+    grid = convertToMaterial(config["textureMapPath"], tex)
 
     # redefine displacement map
     print("redefining displacement map")
