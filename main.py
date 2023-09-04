@@ -42,7 +42,7 @@ def placeWallBricks(displacementGrid, brickHeightGrid, size, worldScale, worldOf
         while y < (size[not LOCALXAXIS]):
             materialGrid[x][y].testWallBricks(displacementUpperLimitRow, displacementBottomLimitRow,
                                               neighbourDispUpperLimitRow, neighbourDispBottomLimitRow,
-                                              materialRow, y, (y, x), worldScale, worldOffset, zStepSize, LOCALXAXIS)
+                                              materialRow, y, (x if LOCALXAXIS else y, y if LOCALXAXIS else x), worldScale, worldOffset, zStepSize, LOCALXAXIS)
             y += 1
         print(f'for Row {x}: {round(time() - startTimer, 4)} sec.')
         
@@ -120,10 +120,8 @@ if __name__ == '__main__':
     print("loading displacement map")
     displacementGrid = np.asarray(Image.open(config["heightMapPath"]))
     #displacementGrid = np.array([[32 * y for y in range(4)] for x in range(4)])
-    #displacementGrid = np.array([[0, 0, 0, 0],
-    #                             [128, 128, 128, 128],
-    #                             [0, 128, 128, 0],
-    #                             [0, 128, 128, 32, 0]])
+    #displacementGrid = np.array([[0, 1024],
+    #                             [0, 1024]])
     #print(displacementGrid)
 
     # load textureMap
@@ -139,7 +137,7 @@ if __name__ == '__main__':
                 displacementGrid[x][y] = int(displacementGrid[x][y] / stepSize) * stepSize
 
     # define global offset
-    worldOffset = config.get("worldOffset", [0,0,0])#[-len(displacementGrid)/2, -len(displacementGrid[0])/2, 0])
+    worldOffset = config.get("worldOffset", [-len(displacementGrid)/2, -len(displacementGrid[0])/2, 0])
 
     # place Bricks
     print("placing bricks")
