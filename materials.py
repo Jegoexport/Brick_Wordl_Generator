@@ -89,28 +89,40 @@ class material:
                        neighbourDispBottomLimitRow, materialRow, COORDINATE, coordinates: (int, int),
                        worldscale: (float, float, float), worldOffset, zStepSize, LOCALXAXIS):
         finalBrick = False
-        if displacementBottomLimitRow[COORDINATE] > neighbourDispUpperLimitRow[COORDINATE]:
-            for brick in self.wallBricks:
-                if brick.downBrickTest(COORDINATE, self, displacementBottomLimitRow, materialRow):
-                    finalBrick = brick
-            if finalBrick:
-                finalBrick.redefineBrick(
-                    (coordinates[0] + worldOffset[0], coordinates[1] + worldOffset[1],
-                     neighbourDispBottomLimitRow[COORDINATE]), worldscale, LOCALXAXIS)
-                for x in range(COORDINATE, COORDINATE + finalBrick.size[0]):
-                    displacementBottomLimitRow[x] -= finalBrick.size[2] * zStepSize
-                return finalBrick.size[0]
-        elif displacementUpperLimitRow[COORDINATE] < neighbourDispBottomLimitRow[COORDINATE]:
-            for brick in self.wallBricks:
-                if brick.upBrickTest(COORDINATE, self, neighbourDispBottomLimitRow, materialRow):
-                    finalBrick = brick
-            if finalBrick:
-                finalBrick.redefineBrick(
-                    (coordinates[0] + worldOffset[0] + 1, coordinates[1] + worldOffset[1] + 1,
-                     neighbourDispBottomLimitRow[COORDINATE] + worldOffset[2]), worldscale, LOCALXAXIS)
-                for x in range(COORDINATE, COORDINATE + finalBrick.size[0]):
-                    neighbourDispBottomLimitRow[x] -= finalBrick.size[2] * zStepSize
-                return finalBrick.size[0]
+        while True:
+            if displacementBottomLimitRow[COORDINATE] > neighbourDispUpperLimitRow[COORDINATE]:
+                for brick in self.wallBricks:
+                    if brick.downBrickTest(COORDINATE, self, displacementBottomLimitRow, materialRow):
+                        finalBrick = brick
+                if finalBrick:
+                    finalBrick.redefineBrick(
+                        (coordinates[0] + worldOffset[0], coordinates[1] + worldOffset[1],
+                         displacementBottomLimitRow[COORDINATE]), worldscale, LOCALXAXIS)
+                    for x in range(COORDINATE, COORDINATE + finalBrick.size[0]):
+                        displacementBottomLimitRow[x] -= finalBrick.size[2] * zStepSize
+                    #return finalBrick.size[0]
+                else:
+                    print(f"No matching Brick found for {coordinates} at height {displacementBottomLimitRow[COORDINATE]}")
+                    break
+            else:
+                break
+        while True:
+            if displacementUpperLimitRow[COORDINATE] < neighbourDispBottomLimitRow[COORDINATE]:
+                for brick in self.wallBricks:
+                    if brick.upBrickTest(COORDINATE, self, neighbourDispBottomLimitRow, materialRow):
+                        finalBrick = brick
+                if finalBrick:
+                    finalBrick.redefineBrick(
+                        (coordinates[0] + worldOffset[0] + 1, coordinates[1] + worldOffset[1] + 1,
+                         neighbourDispBottomLimitRow[COORDINATE] + worldOffset[2]), worldscale, LOCALXAXIS)
+                    for x in range(COORDINATE, COORDINATE + finalBrick.size[0]):
+                        neighbourDispBottomLimitRow[x] -= finalBrick.size[2] * zStepSize
+                    #return finalBrick.size[0]
+                else:
+                    print(f"No matching Brick found for {coordinates} at height {displacementBottomLimitRow[COORDINATE]}")
+                    break
+            else:
+                break
         return 1
 
 
