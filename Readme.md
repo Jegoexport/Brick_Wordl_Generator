@@ -23,6 +23,11 @@ This program places bricks based on height and texture maps for [BeamND.drive](h
 
 ## Setting up
 
+### Needed Libraries:
+
+* numpy
+* pillow 
+
 ### Output & integration into BeamNG
 
 The Output will be saved in the jsonsOutput Folder. This Folder can simply be copied to the SceneObject folder in BeamNG.
