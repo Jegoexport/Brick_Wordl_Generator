@@ -1,6 +1,6 @@
 # Brick World Gernerator
 
-![TestWorld, Screenshot from BeamNG](assets\images\ExampleRenderBeamNG.jpg)
+![TestWorld, Screenshot from BeamNG](https://github.com/Jegoexport/Brick_Wordl_Generator/blob/master/assets/images/ExampleRenderBeamNG.jpg)
 
 This program places bricks based on height and texture maps for [BeamND.drive](https://www.beamng.com)
 
@@ -62,7 +62,7 @@ The config.json file holds standard application data and needs to be configures 
 * `` color ``: RGB Color Code that refers to this Material on the texture map.
 * ``type``: Brick Type of the Material. Available options are ``flat`` (default), ``slope`` or ``road``. If a material 
   has different kinds of bricks eg: ``flat`` and ``slope`` you should use the least, so ``slope`` for this.
-* `` bricks ``: This is an array of all Bricks in this Material. For more information see [Brick Properties](#Brick).
+* `` bricks ``: This is an array of all Bricks in this Material. For more information see [Brick Properties](#brick-properties).
 > **Note**
 > The Order of the brick in the array matters
 
@@ -70,12 +70,12 @@ The config.json file holds standard application data and needs to be configures 
 * ``name``: Name of the material. If not given it is the json-file name. (Debug purpose only)
 * ``type``: Brick Type of the Material. Available options are ``flat`` (default), ``slope`` or ``road``. If a material 
   has different kinds of bricks eg: ``flat`` and ``slope`` you should use the least, so ``slope`` for this.
-* ``wallBricks``: List of Bricks placed under other Bricks if a hole occurs. For more information see [wallBricks Properties](#wallBricks).
+* ``wallBricks``: List of Bricks placed under other Bricks if a hole occurs. For more information see [wallBricks Properties](#WallBrick-Properties).
 > **Warning**
 > If you don't specify any wallBricks only may appear. 
 
 
-#### Brick Properties: {#Brick}
+#### Brick Properties
 
 ##### Required:
 
@@ -101,7 +101,7 @@ are as high or higher
 * ``type``: Brick Type of the Brick. Available options are ``flat`` (default), ``slope`` or ``road``.
 * 
 
-#### WallBrick Properties {#wallBricks}
+#### WallBrick Properties
 
 ##### Required:
 
