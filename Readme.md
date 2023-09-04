@@ -1,4 +1,6 @@
-# Procedural Brick Placement
+# Brick World Gernerator
+
+![TestWorld, Screenshot from BeamNG](assets\images\ExampleRenderBeamNG.jpg)
 
 This program places bricks based on height and texture maps for [BeamND.drive](https://www.beamng.com)
 
@@ -8,14 +10,14 @@ This program places bricks based on height and texture maps for [BeamND.drive](h
 
 * place basic quadratic bricks like 1x1, 2x2, 4x4 according to height map
 * build streets with flat bricks angled in direction ot the street
-* main or root Config-File
+* main Config-File
+* placement of vertical 'wall' Bricks
 
 ### Work in Progress:
 
 * procedural placement on nature elements like trees, bushes and plants based on texture map
-* placement of non-flat rock bricks, like 2x1x6 bricks where on side is angled
+* placement of non-flat rock bricks, like 2x1x6 bricks where on side is angled (working a bit)
 * placement of non square bricks
-* filling of vertical holes
 
 -------------
 
@@ -47,32 +49,76 @@ The config.json file holds standard application data and needs to be configures 
   half the worldsize in x and y direction and 0 for z.
 * ``heightMapPath``: Path to your HeightMap.
 > **Warning**
-> Your Height should be and **black and white** only png and have the **same size** as your texturePathMap. I recommend
-> a color depth of 16 bits.
+> Your Height should be and **black and white** only png and have the **same size** as your ``texturePathMap``. I recommend
+> a color depth of 16 bits for larger worlds.
 * ``texturePathMap``: Path to your TextureMap. I recommend and png with an 8-bit color depth.
 
 ### Define a Material
 
 #### Basic Properties:
 
+##### Required:
+
 * `` color ``: RGB Color Code that refers to this Material on the texture map.
 * ``type``: Brick Type of the Material. Available options are ``flat`` (default), ``slope`` or ``road``. If a material 
   has different kinds of bricks eg: ``flat`` and ``slope`` you should use the least, so ``slope`` for this.
-* `` bricks ``: This is an array of all Bricks in this Material:
+* `` bricks ``: This is an array of all Bricks in this Material. For more information see [Brick Properties](#Brick).
 > **Note**
 > The Order of the brick in the array matters
 
-#### Brick Properties:
+##### Optional:
+* ``name``: Name of the material. If not given it is the json-file name. (Debug purpose only)
+* ``type``: Brick Type of the Material. Available options are ``flat`` (default), ``slope`` or ``road``. If a material 
+  has different kinds of bricks eg: ``flat`` and ``slope`` you should use the least, so ``slope`` for this.
+* ``wallBricks``: List of Bricks placed under other Bricks if a hole occurs. For more information see [wallBricks Properties](#wallBricks).
+> **Warning**
+> If you don't specify any wallBricks only may appear. 
+
+
+#### Brick Properties: {#Brick}
+
+##### Required:
 
   * ``name``: Name of the Brick. A Folder is created with this name in jsonsOutput to write all data for this brick in a
     specific items.level.json.
-  * ``size``: Array with X-,Y- and Z-Dimensions of this Brick in brickscale.
-  * ``minSlope``: minium slope. Optional. Default Value is 0.
+  * ``size``: Size in bricks for x, y and z.
+
   * ``rotatatable``: Boolean. If the rotation with 90° make a difference that set it to ``true``. If not to ``False``.
   * ``persistendID``: ID that the items.level.json (BeamNG) needs. Not important. Can be the same for now for all object"
   * ``linkedObject``: Filepath to DAE-file for the 3d-Object of this brick. 
   > **Note** 
   > Use a short Path to reduce the Size of items.level.json file.
+
+##### Optional:
+
+* ``offset``: Offset in x, y and z Direction of the Brick. Rotation will be applied to it. *Default* ``(0, 0, 0)``
+* ``scale``: Scale if the items.level.json file for BeamNG. *Default* ``(1, 1, 1)``
+* ``randomZRotation``: If ``true`` random rotation will applied around the Z-axis. *Default* ``false``
+* ``rotatatable``: Boolean. If the rotation with 90° make a difference that set it to ``true``. *Default* ``False``. *Work in progress* 
+* ``linkedFlatObject``: Filepath to DAE-file with only the top faces. It will only be placed if all surrounding bricks
+are as high or higher
+* ``minSlope``: Minium slope at which the brick can be placed *Default* ``0``.
+* ``type``: Brick Type of the Brick. Available options are ``flat`` (default), ``slope`` or ``road``.
+* 
+
+#### WallBrick Properties {#wallBricks}
+
+##### Required:
+
+* ``name``: Name of the Brick. A Folder is created with this name in jsonsOutput to write all data for this brick in a
+    specific items.level.json.
+* ``size``: Size in bricks for x, y and z. Only x and z direction are used.
+* ``linkedObject``: Array of filepath(s) to DAE-file(s) for the 3d-Object of this brick. If given more than one 
+filepath will be randomly chosen. 
+  > **Note** 
+  > Use a short Path to reduce the Size of items.level.json file.
+
+##### Optional:
+
+* ``offset``: Offset in x, y and z Direction of the Brick. Rotation will be applied to it. *Default* ``(0, 0, 0)``
+* ``scale``: Scale if the items.level.json file for BeamNG. *Default* ``(1, 1, 1)``
+* ``randomZRotation``: If ``true`` random rotation will applied around the Z-axis. *Default* ``false``
+
 
 #### Example Material
 
