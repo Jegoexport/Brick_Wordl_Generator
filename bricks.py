@@ -21,6 +21,7 @@ class brick:
         self.persistentID = data["persistentID"]
         # name of the object in BeamNG
         self.name = data["name"]
+        self.randomZRaotation = data.get("randomZRotation", False)
         # File to linked DAE-file containing the mesh of this brick
         # main mesh of object
         self.linkedObject = data["linkedObject"]
@@ -63,14 +64,17 @@ class brick:
             matrix *= np.matrix([[math.cos(rotation[2]), -math.sin(rotation[2]), 0],
                                  [math.sin(rotation[2]), math.cos(rotation[2]), 0],
                                  [0, 0, 1]])
-            matrix[abs(matrix) < 1e-8] = 0
+            """matrix[abs(matrix) < 1e-8] = 0
             matrix[matrix > 1 - 1e-8] = 1
-            matrix[matrix < -1 + 1e-8] = -1
+            matrix[matrix < -1 + 1e-8] = -1"""
             return matrix
 
-        position = [round((coordinates[0] + self.offset[0]) * worldscale[0], 3),
-                    round((coordinates[1] + self.offset[1]) * worldscale[1], 3),
-                    round((coordinates[2] + self.offset[2]) * worldscale[2], 4)]
+        matrix = rotationMatrix()
+        offset = self.offset * matrix
+        #print(offset[0,1])
+        position = [round((coordinates[0] + offset[0,1]) * worldscale[0], 3),
+                    round((coordinates[1] + offset[0,1]) * worldscale[1], 3),
+                    round((coordinates[2] + offset[0,2]) * worldscale[2], 4)]
         text = '{' + f'"class":"TSStatic","__parent":"{self.name}",' \
                      f'"position":{position},"isRenderEnabled":false,'
         # deleted: "persistentId":"{self.persistentID}",
@@ -79,7 +83,6 @@ class brick:
                     f'{self.scale[1] * scale[1]},' \
                     f'{self.scale[2] * scale[2]}],'
         if any(i != 0 for i in rotation):
-            matrix = rotationMatrix()
             text += f'"rotationMatrix":[{matrix[0, 0]},{matrix[0, 1]},{matrix[0, 2]},' \
                     f'{matrix[1, 0]},{matrix[1, 1]},{matrix[1, 2]},' \
                     f'{matrix[2, 0]},{matrix[2, 1]},{matrix[2, 2]}],'
@@ -132,9 +135,18 @@ class normalBrick(brick):
     def brickSlopeTest(self, coordinates: (int, int), worldSize: (int, int), height: int, materialIndex: int,
                       displacementGrid: [[int]], materialGrid: [[int]], finishedGrid: [[bool]], testedGrid: [[bool]])\
             -> bool:
-        # todo
 
-        self.slope(height, coordinates, worldSize, displacementGrid, materialGrid, "slope")
+        x = coordinates[0] + 1
+        slopePositivX = (displacementGrid[x][coordinates[1]] - height) if x < worldSize[0] else 0
+        x = coordinates[0] - 1
+        slopeNegativX = (height - displacementGrid[x][coordinates[1]]) if x < worldSize[0] else 0
+        y = coordinates[1] + 1
+        slopePositivY = (displacementGrid[coordinates[0]][y] - height) if y < worldSize[1] else 0
+        y = coordinates[1] - 1
+        slopeNegativY = (height - displacementGrid[coordinates[0]][y]) if y < worldSize[1] else 0
+
+        self.slopeX = slopePositivX if slopePositivX >= 0 else (slopeNegativX if slopeNegativX <= 0 else 0)
+        self.slopeY = slopePositivY if slopePositivY >= 0 else (slopeNegativY if slopeNegativY <= 0 else 0)
 
         if abs(self.slopeX) > abs(self.slopeY):
             if self.minSlope <= self.slopeX:
@@ -145,10 +157,10 @@ class normalBrick(brick):
                 return True
         else:
             if self.minSlope <= self.slopeY:
-                self.rotation = 90
+                self.rotation = 270
                 return True
             elif self.minSlope <= -self.slopeY:
-                self.rotation = 270
+                self.rotation = 90
                 return True
         return False
 
@@ -290,7 +302,7 @@ class normalBrick(brick):
         linkedModels = defineModel()
         linkedModel = linkedModels[randrange(len(linkedModels))]
 
-        rotation = [0, 0, math.radians(self.rotation)]
+        rotation = [0, 0, math.radians(randrange(360) if self.randomZRaotation else self.rotation)]
         scale = [1,1,1]
 
         # "apply" Rotation and Scaling for road bricks
@@ -303,7 +315,9 @@ class normalBrick(brick):
                 rotation[0] = -math.atan(self.slopeY * worldscale[2] / worldscale[1])
 
         # add WorldOffset
-        coordinates = [coordinates[0]+worldOffset[0], coordinates[1]+worldOffset[1], coordinates[2]+worldOffset[2]]
+        coordinates = [coordinates[0] + worldOffset[0],
+                       coordinates[1] + worldOffset[1],
+                       coordinates[2] + worldOffset[2]]
 
         self.placeInstance(coordinates, worldscale, rotation, linkedModel, scale)
 
