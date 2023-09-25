@@ -1,4 +1,4 @@
-# Brick World Gernerator
+# Brick World Generator
 
 ![TestWorld, Screenshot from BeamNG](https://github.com/Jegoexport/Brick_Wordl_Generator/blob/master/assets/images/ExampleRenderBeamNG.jpg)
 
@@ -84,7 +84,7 @@ The config.json file holds standard application data and needs to be configures 
   * ``size``: Size in bricks for x, y and z.
 
   * ``rotatatable``: Boolean. If the rotation with 90° make a difference that set it to ``true``. If not to ``False``.
-  * ``persistendID``: ID that the items.level.json (BeamNG) needs. Not important. Can be the same for now for all object"
+  * ``persistendID``: ID that the items.level.json (BeamNG) needs. Not important. Can be the same for now for all object
   * ``linkedObject``: Filepath to DAE-file for the 3d-Object of this brick. 
   > **Note** 
   > Use a short Path to reduce the Size of items.level.json file.
@@ -93,7 +93,7 @@ The config.json file holds standard application data and needs to be configures 
 
 * ``offset``: Offset in x, y and z Direction of the Brick. Rotation will be applied to it. *Default* ``(0, 0, 0)``
 * ``scale``: Scale if the items.level.json file for BeamNG. *Default* ``(1, 1, 1)``
-* ``randomZRotation``: If ``true`` random rotation will applied around the Z-axis. *Default* ``false``
+* ``randomZRotation``: If ``true`` random rotation will be applied around the Z-axis. *Default* ``false``
 * ``rotatatable``: Boolean. If the rotation with 90° make a difference that set it to ``true``. *Default* ``False``. *Work in progress* 
 * ``linkedFlatObject``: Filepath to DAE-file with only the top faces. It will only be placed if all surrounding bricks
 are as high or higher
@@ -117,7 +117,7 @@ filepath will be randomly chosen.
 
 * ``offset``: Offset in x, y and z Direction of the Brick. Rotation will be applied to it. *Default* ``(0, 0, 0)``
 * ``scale``: Scale if the items.level.json file for BeamNG. *Default* ``(1, 1, 1)``
-* ``randomZRotation``: If ``true`` random rotation will applied around the Z-axis. *Default* ``false``
+* ``randomZRotation``: If ``true`` random rotation will be applied around the Z-axis. *Default* ``false``
 
 
 #### Example Material
