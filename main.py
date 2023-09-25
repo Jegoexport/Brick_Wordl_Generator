@@ -11,7 +11,7 @@ def place(displacementGrid, materialGrid: [[material]], materials: [material], w
           worldOffset: [float, float, float], zStepSize: int):
     size = (len(displacementGrid), len(displacementGrid[0]))
     finishedGrid = np.array([[False] * size[1]] * size[0])
-    brickHeightGrid = np.empty([size[0], size[1]], dtype=int)
+    brickHeightGrid = np.copy(displacementGrid) #np.empty([size[0], size[1]], dtype=int)
     for x in range(size[0]):
         startTimer = time()
         y = 0
@@ -23,26 +23,25 @@ def place(displacementGrid, materialGrid: [[material]], materials: [material], w
                 y += 1
         print(f'for Row {x}: {round(time()-startTimer, 4)} sec.')
     placeWallBricks(displacementGrid, brickHeightGrid, size, worldScale, worldOffset, zStepSize, materialGrid)
-    placeWallBricks(displacementGrid, brickHeightGrid, size, worldScale, worldOffset, zStepSize, materialGrid, 1)
+    placeWallBricks(displacementGrid, brickHeightGrid, size, worldScale, worldOffset, zStepSize, materialGrid, True)
 
-def placeWallBricks(displacementGrid, brickHeightGrid, size, worldScale, worldOffset, zStepSize, materialGrid: [[material]], LOCALXAXIS: bool = 0):
+def placeWallBricks(displacementGrid, brickHeightGrid, size, worldScale, worldOffset, zStepSize,
+                    materialGrid: [[material]], LOCALXAXIS: bool = False):
     for x in range(size[LOCALXAXIS]-1):
         startTimer = time()
-        displacementUpperLimitRow = brickHeightGrid[x] if LOCALXAXIS else np.array(
-            [row[x] for row in brickHeightGrid])
-        displacementBottomLimitRow = displacementGrid[x] if LOCALXAXIS else np.array(
-            [row[x] for row in displacementGrid])
-        neighbourDispUpperLimitRow = brickHeightGrid[x + 1] if LOCALXAXIS else np.array(
-            [row[x + 1] for row in brickHeightGrid])
-        neighbourDispBottomLimitRow = displacementGrid[x + 1] if LOCALXAXIS else np.array(
-            [row[x + 1] for row in displacementGrid])
-        materialRow = materialGrid[x] if LOCALXAXIS else np.array(
-            [row[x] for row in materialGrid])
+        displacementUpperLimitRow = np.array([row[x] for row in brickHeightGrid]) if LOCALXAXIS else brickHeightGrid[x]
+        displacementBottomLimitRow = np.array([row[x] for row in displacementGrid]) if LOCALXAXIS \
+            else np.copy(displacementGrid[x])
+        neighbourDispUpperLimitRow = np.array([row[x + 1] for row in brickHeightGrid]) if LOCALXAXIS \
+            else brickHeightGrid[x + 1]
+        neighbourDispBottomLimitRow = np.array([row[x + 1] for row in displacementGrid]) if LOCALXAXIS \
+            else np.copy(displacementGrid[x + 1])
+        materialRow = np.array([row[x] for row in materialGrid]) if LOCALXAXIS else materialGrid[x]
         y = 0
         while y < (size[not LOCALXAXIS]):
             materialGrid[x][y].testWallBricks(displacementUpperLimitRow, displacementBottomLimitRow,
                                               neighbourDispUpperLimitRow, neighbourDispBottomLimitRow,
-                                              materialRow, y, (x if LOCALXAXIS else y, y if LOCALXAXIS else x), worldScale, worldOffset, zStepSize, LOCALXAXIS)
+                                              materialRow, y, (y if LOCALXAXIS else x, x if LOCALXAXIS else y), worldScale, worldOffset, zStepSize, LOCALXAXIS)
             y += 1
         print(f'for Row {x}: {round(time() - startTimer, 4)} sec.')
         
@@ -106,27 +105,30 @@ if __name__ == '__main__':
     print("loading materials...", end=' ')
     start = time_ns()
     tex = [material((f'materials/' + path)) for path in config["materialPaths"]]
-    #tex = [material(("materials/grassMaterial.json"))]
+    #tex = [material(("materials/exampleMaterial.json"))]
     print(time_ns()-start, "nanosec for", len(tex), "materials")
 
     # define Worldscale
     stepSize = int(config["stepSize"])
     scale = config["worldscale"]
     scale[2] = scale[2]/stepSize
-
     print(stepSize)
 
     # load heightMap
     print("loading displacement map")
     displacementGrid = np.asarray(Image.open(config["heightMapPath"]))
     #displacementGrid = np.array([[32 * y for y in range(4)] for x in range(4)])
-    #displacementGrid = np.array([[0, 1024],
-    #                             [0, 1024]])
+    #displacementGrid = np.array([[0, 0, 0],
+    #                             [0, 128, 0],
+    #                             [0, 0, 0]])
+    #                             [0, 128, 0, 0, 128, 0],
+    #                             [0, 128, 128, 128, 128, 0],
+    #                             [0, 0, 0, 0, 0, 0]])
     #print(displacementGrid)
 
     # load textureMap
     print("loading material map")
-    #grid = [[tex[0]]*4]*4
+    #grid = [[tex[0]]*3]*3
     grid = convertToMaterial(config["textureMapPath"], tex)
 
     # redefine displacement map
@@ -142,7 +144,7 @@ if __name__ == '__main__':
     # place Bricks
     print("placing bricks")
     startTimePlacing = time()
-    place(displacementGrid, grid, tex, scale, worldOffset, stepSize), #[grass, road, lines]'''
+    place(displacementGrid, grid, tex, scale, worldOffset, stepSize)
 
     totalNumBricks = 0
     for material in tex:

@@ -14,6 +14,8 @@ class brick:
          dictionary look up the docs.
         """
         self.size = data["size"]
+        # if offset is rotated with rotation: Default False if quadratic else True
+        self.rotateOffset = data.get("rotateOffset", True if self.size[0] != self.size[1] else False)
         # offset of object when placed
         self.offset = data.get("offset", (0, 0, 0))
         self.scale = data.get("scale", [1, 1, 1])
@@ -21,7 +23,7 @@ class brick:
         self.persistentID = data["persistentID"]
         # name of the object in BeamNG
         self.name = data["name"]
-        self.randomZRaotation = data.get("randomZRotation", False)
+        self.randomZRotation = data.get("randomZRotation", False)
         # File to linked DAE-file containing the mesh of this brick
         # main mesh of object
         self.linkedObject = data["linkedObject"]
@@ -64,17 +66,18 @@ class brick:
             matrix *= np.matrix([[math.cos(rotation[2]), -math.sin(rotation[2]), 0],
                                  [math.sin(rotation[2]), math.cos(rotation[2]), 0],
                                  [0, 0, 1]])
-            """matrix[abs(matrix) < 1e-8] = 0
+            matrix[abs(matrix) < 1e-8] = 0
             matrix[matrix > 1 - 1e-8] = 1
-            matrix[matrix < -1 + 1e-8] = -1"""
+            matrix[matrix < -1 + 1e-8] = -1
             return matrix
 
         matrix = rotationMatrix()
-        offset = self.offset * matrix
-        #print(offset[0,1])
-        position = [round((coordinates[0] + offset[0,1]) * worldscale[0], 3),
-                    round((coordinates[1] + offset[0,1]) * worldscale[1], 3),
-                    round((coordinates[2] + offset[0,2]) * worldscale[2], 4)]
+        offset = ((self.offset[1], self.offset[0], self.offset[2]) if rotation[2] % math.radians(180) != math.radians(
+            90) else self.offset) if self.rotateOffset else self.offset
+        # oldcode: np.array(self.offset * matrix)[0]
+        position = [round((coordinates[0] + offset[0]) * worldscale[0], 3),
+                    round((coordinates[1] + offset[1]) * worldscale[1], 3),
+                    round((coordinates[2] + offset[2]) * worldscale[2], 4)]
         text = '{' + f'"class":"TSStatic","__parent":"{self.name}",' \
                      f'"position":{position},"isRenderEnabled":false,'
         # deleted: "persistentId":"{self.persistentID}",
@@ -201,7 +204,7 @@ class normalBrick(brick):
             if X >= 0:
                 # Is new positions same material?
                 if materialGrid[X][coordinates[1]].materialType == materialType:
-                    self.slopeX = displacementGrid[X][coordinates[1]] - height
+                    self.slopeX = height - displacementGrid[X][coordinates[1]]
 
         X = coordinates[0] + 1
         # is X in world bounds?
@@ -215,6 +218,26 @@ class normalBrick(brick):
             secondX()
 
         # Checking Y-Slope
+        def secondY():
+            # If not, is new Y in world bounds?
+            Y = coordinates[1] - 1
+            if Y >= 0:
+                # Is new positions same material?
+                if materialGrid[coordinates[0]][Y].materialType == materialType:
+                    self.slopeY = height - displacementGrid[coordinates[0]][Y]
+
+        Y = coordinates[1] + 1
+        # is Y in world bounds?
+        if Y < worldSize[1]:
+            # If not, is new positions the same material?
+            if materialGrid[coordinates[0]][Y].materialType == materialType:
+                self.slopeY = displacementGrid[coordinates[0]][Y] - height
+            else:
+                secondY()
+        else:
+            secondY()
+                
+        """# Checking Y-Slope (old Code)
         Y = coordinates[1] + 1
         # is X in world bounds?
         if Y >= worldSize[0]:
@@ -230,9 +253,9 @@ class normalBrick(brick):
                     self.slopeY = 0
                 elif materialGrid[coordinates[0]][Y].materialType == materialType:
                     # If not, is new positions a road block as well?
-                    self.slopeY = -(displacementGrid[coordinates[0]][Y] - height)
+                    self.slopeY = height - displacementGrid[coordinates[0]][Y]
                 else:
-                    self.slopeY = 0
+                    self.slopeY = 0"""
 
     def brickFlatTest(self, coordinates: (int, int), worldSize: (int, int), height: int, materialIndex: int,
                       displacementGrid: np.ndarray, materialGrid: [[int]], finishedGrid: [[bool]], testedGrid: [[bool]])\
@@ -302,7 +325,7 @@ class normalBrick(brick):
         linkedModels = defineModel()
         linkedModel = linkedModels[randrange(len(linkedModels))]
 
-        rotation = [0, 0, math.radians(randrange(360) if self.randomZRaotation else self.rotation)]
+        rotation = [0, 0, math.radians(randrange(360) if self.randomZRotation else self.rotation)]
         scale = [1,1,1]
 
         # "apply" Rotation and Scaling for road bricks
@@ -326,29 +349,17 @@ class wallBrick(brick):
     def __init__(self, data: dict):
         brick.__init__(self, data)
 
-    def upBrickTest(self, coordinate: int, material, neighbourDispRow, materialRow: [[]]) -> bool:
-        # 0 32
-        MAX_SIZE: int = len(neighbourDispRow)
-        HEIGHT: int = neighbourDispRow[coordinate]  # + (32 * self.size[2])
+    def brickTest(self, coordinate: int, material, bottomLimitRow: np.ndarray, materialRow: [[]]) -> bool:
+        MAX_SIZE: int = len(bottomLimitRow)
+        HEIGHT: int = bottomLimitRow[coordinate]
+        MATERIAL = materialRow[coordinate]
         for localX in range(coordinate, coordinate + self.size[0]):
             if localX >= MAX_SIZE:
                 return False
-            if neighbourDispRow[localX] != HEIGHT or materialRow[localX] != material:
+            if bottomLimitRow[localX] != HEIGHT or materialRow[localX] != MATERIAL:
                 return False
-        self.rotation = 0
         return True
 
-    def downBrickTest(self, coordinate: int, material, displacementRow: np.ndarray, materialRow: [[]]) -> bool:
-        MAX_SIZE: int = len(displacementRow)
-        HEIGHT: int = displacementRow[coordinate]  # + (32 * self.size[2])
-        for localX in range(coordinate, coordinate + self.size[0]):
-            if localX >= MAX_SIZE:
-                return False
-            if displacementRow[localX] != HEIGHT or materialRow[localX] != material:
-                return False
-        self.rotation = 180
-        return True
-
-    def redefineBrick(self, coordinates, worldscale, LOCALXAXIS):
-        rotation = [0, 0, math.radians(self.rotation if LOCALXAXIS else self.rotation + 90)]
+    def redefineBrick(self, coordinates, worldscale, smallRotation, bickRotation):
+        rotation = [0, 0, math.radians(90 * smallRotation + 180 * bickRotation)]
         self.placeInstance(coordinates, worldscale, rotation, self.linkedObject[randrange(len(self.linkedObject))])
